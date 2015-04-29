@@ -1,0 +1,7 @@
+[package]
+name = "rusteer"
+version = "0.1.0"
+authors = ["Martin Evans <martindevans@gmail.com>"]
+
+[dependencies]
+nalgebra = "0.2.12"
