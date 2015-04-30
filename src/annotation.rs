@@ -18,9 +18,6 @@ pub trait AnnotationBase {
 
     fn disk_3d(radius: f32, center: Vec3<f32>, axis: Vec3<f32>, color: Vec3<f32>, opacity: f32, segments: i32);
 
-    fn avoid_obstacle(min_distance_to_collision: f32) {
-    }
-
     fn path_following(future: Vec3<f32>, on_path: Vec3<f32>, target: Vec3<f32>, outside: f32) {
     }
 

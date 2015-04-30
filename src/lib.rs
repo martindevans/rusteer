@@ -15,3 +15,6 @@ pub use vector::{ VectorHelper };
 
 pub mod flowfield;
 pub use flowfield::{ FlowfieldBase };
+
+pub mod random;
+pub use random::{ scalar_random_walk };
