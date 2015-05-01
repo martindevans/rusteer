@@ -1,5 +1,5 @@
 extern crate nalgebra;
-use self::nalgebra::{ Vec3 };
+use self::nalgebra::{ Vec3, Dot, Norm  };
 
 use annotation::{ AnnotationBase };
 use vector::{ VectorHelper };
@@ -8,13 +8,17 @@ use pathway::{ PathwayBase };
 use obstacle::{ ObstacleBase };
 use random::{ scalar_random_walk };
 
-pub trait VehicleBase {
-    //These 4 should be in ILocalSpaceBasis (in C# terms), do we need such a trait?
+pub trait LocalSpaceBasis {
     fn side(&self) -> Vec3<f32>;
-    fn up(&self) -> Vec3<f32>;
-    fn forward(&self) -> Vec3<f32>;
-    fn position(&self) -> Vec3<f32>;
 
+    fn up(&self) -> Vec3<f32>;
+
+    fn forward(&self) -> Vec3<f32>;
+
+    fn position(&self) -> Vec3<f32>;
+}
+
+pub trait VehicleBase : LocalSpaceBasis {
     fn mass(&self) -> f32;
 
     fn radius(&self) -> f32;
@@ -78,6 +82,57 @@ pub trait VehicleBase {
     fn steer_to_avoid_obstacles(&self, min_collision_time: f32, obstacles: &[&ObstacleBase], annotations: &AnnotationBase) -> Vec3<f32> {
         panic!();
     }
+
+    fn steer_for_separation(&self, max_distance: f32, cos_max_angle: f32, others: &mut Iterator<Item=&VehicleBase>, annotations: &AnnotationBase) -> Vec3<f32> where Self: Sized+VehicleBase {
+        let mut steering = Vec3::<f32>::new(0.0, 0.0, 0.0);
+        let mut neighbours = 0;
+
+        for other in others {
+            if is_in_boid_neighbourhood(self, other, self.radius() * 3.0, max_distance, cos_max_angle) {
+                // add in steering contribution
+                // (opposite of the offset direction, divided once by distance
+                // to normalize, divided another time to get 1/d falloff)
+                let offset = other.position() - self.position();
+                let distance_sqr = offset.dot(&offset);
+                steering = steering + (offset / -distance_sqr);
+
+                // count neighbors
+                neighbours += 1;
+            }
+        }
+
+        // divide by neighbors, then normalize to pure direction
+        if neighbours > 0 {
+            steering = steering / (neighbours as f32);
+            steering.normalize();
+        }
+
+        return steering;
+    }
+
+    fn steer_to_avoid_close_neighbours(&self, min_distance: f32, others: &mut Iterator<Item=&VehicleBase>, annotations: &AnnotationBase) -> Vec3<f32> {
+        panic!();
+    }
+
+    fn steer_for_alignment(&self, max_distance: f32, cos_max_angle: f32, others: &mut Iterator<Item=&VehicleBase>, annotations: &AnnotationBase) -> Vec3<f32> where Self: Sized+VehicleBase {
+        panic!();
+    }
+
+    fn steer_for_cohesion(&self, max_distance: f32, cos_max_angle: f32, others: &mut Iterator<Item=&VehicleBase>, annotations: &AnnotationBase) -> Vec3<f32> where Self: Sized+VehicleBase {
+        panic!();
+    }
+
+    fn steer_for_pursuit(&self, quarry: &VehicleBase, max_prediction_time: f32, max_speed: f32, annotations: &AnnotationBase) -> Vec3<f32> {
+        panic!();
+    }
+
+    fn steer_for_evasion(&self, menace: &VehicleBase, max_prediction_time: f32, max_speed: f32, annotations: &AnnotationBase) -> Vec3<f32> {
+        panic!();
+    }
+}
+
+fn is_in_boid_neighbourhood(vehicle: &VehicleBase, other: &VehicleBase, min_distance: f32, max_distance: f32, cos_max_angle: f32) -> bool {
+    panic!();
 }
 
 /* pub struct SimpleVehicle {
